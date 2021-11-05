@@ -11,13 +11,11 @@ const { Server: IOServer } = require('socket.io')
 const Contenedor = require('./Contenedor')
 const inventario = new Contenedor('productos.txt')
 
-
-
 const app = express()
 const httpServer = new HttpServer(app)
 const io = new IOServer(httpServer)
 
-const mensajes = []
+const chat = []
 app.use(express.static('public'))
 
 //Configuracion del motor de vistas que se usara
@@ -46,9 +44,9 @@ io.on('connection', async socket => {
 
     /* Escucho los mensajes enviado por el cliente y se los propago a todos */
     socket.on('nuevoMensaje', data => {
-        data.fechayhora = moment(new Date()).format('DD/MM/YYYY HH:MM:SS');
-        mensajes.push(data)
-        io.sockets.emit('mensajes', mensajes)
+        
+        chat.AddMensaje(data)
+        io.sockets.emit('mensajes', chat.listaMensajes)
     })
 
     /* Escucho los nuevos productos enviado por el cliente y se los propago a todos */
