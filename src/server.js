@@ -1,5 +1,5 @@
 const express = require('express')
-const moment = require('moment')
+
 /**************************************************************************************** */
 const { apiProductos } = require("./routes/apiProductos")
 const { webProductos } = require("./routes/webProductos")
@@ -7,15 +7,18 @@ const { webProductos } = require("./routes/webProductos")
 const { Server: HttpServer } = require('http')
 const { Server: IOServer } = require('socket.io')
 /**************************************************************************************** */
-
 const Contenedor = require('./Contenedor')
 const inventario = new Contenedor('productos.txt')
+/**************************************************************************************** */
+const Chat = require('./Chat')
+const chat = new Chat();
+
+/**************************************************************************************** */
 
 const app = express()
 const httpServer = new HttpServer(app)
 const io = new IOServer(httpServer)
 
-const chat = []
 app.use(express.static('public'))
 
 //Configuracion del motor de vistas que se usara
@@ -36,25 +39,26 @@ io.on('connection', async socket => {
 
     console.log('Nuevo cliente conectado!')
 
+    let mensajes = await chat.init();    
     /* Envio los mensajes al cliente que se conectó */
     socket.emit('mensajes', mensajes)
 
-    const array = await inventario.getAll();
-    socket.emit('productos', array)
+    let productos = await inventario.init();
+    socket.emit('productos', productos)
 
     /* Escucho los mensajes enviado por el cliente y se los propago a todos */
     socket.on('nuevoMensaje', data => {
         
-        chat.AddMensaje(data)
-        io.sockets.emit('mensajes', chat.listaMensajes)
+        mensajes = chat.AddMensaje(data)
+        io.sockets.emit('mensajes',  mensajes)
     })
 
     /* Escucho los nuevos productos enviado por el cliente y se los propago a todos */
     socket.on('nuevoProducto', async prd => {
 
         await inventario.save(prd)
-        const array = await inventario.getAll();
-        io.sockets.emit('productos', array)
+        productos = inventario.getAll();
+        io.sockets.emit('productos', productos)
 
     })
 

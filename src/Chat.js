@@ -1,20 +1,45 @@
 const { options } = require('../options/sqlite.js')
+
 const knex = require('knex')(options)
 
-class Chat{
-    constructor(){
-        listaMensajes=[]
+const moment = require('moment')
+
+
+class Chat {
+    constructor() {
+        this.listaMensajes = []
     }
 
-    init() {
-        knex.select('correo', 'texto', 'year').from('mensajes')
+    async init() {
+        
+        try {
+            this.listaMensajes = await knex.select('author','text','fechayhora').from('mensajes').orderBy('fechayhora', 'desc')
+        }
+        catch (err) { console.log(err) }
+
+        return this.listaMensajes;
     }
 
-    AddMensaje(data){
+    AddMensaje(data) {
+
         data.fechayhora = moment(new Date()).format('DD/MM/YYYY HH:MM:SS');
-        knex('mensajes').insert()
+
+        this.listaMensajes.push(data)
+
+        const { author, text, fechayhora } = data
+        
+        try {
+            knex('mensajes').insert({
+                author: author,
+                text: text,
+                fechayhora: fechayhora
+            }).then(console.log('insert exitoso'))
+        }
+        catch (err) { console.log(err) }
+
+        return this.listaMensajes;
     }
 
 }
 
-module.exports= Chat
+module.exports = Chat

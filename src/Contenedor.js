@@ -1,28 +1,30 @@
-const fs = require('fs');
+const { options } = require('../options/mariaDB')
+const knex = require('knex')(options)
 
- class Contenedor{
+class Contenedor {
 
-    constructor(NombreArchivo){
-        this.ruta=`./archivos/${NombreArchivo}`
-        this.encoding='utf-8'
+    constructor() {
+        this.listaproductos = []
+    }
+
+    async init() {
+        try {
+            this.listaproductos = await knex.select().from('productos').orderBy('id', 'desc')
+        } catch (err) { console.log(err) }
+
+        return this.listaproductos;
     }
 
     // getAll(): Object[] - Devuelve un array con los objetos presentes en el archivo.
-    async getAll(){
-        let array = await fs.promises.readFile(this.ruta, this.encoding)
-        .then(JSON.parse)
-        .catch(()=>{return []})
-
-        return array
+    getAll() {
+        return this.listaproductos;
     }
 
-    async getMaxId(){
-        let items = await this.getAll()
-
+    getMaxId() {
         let id = 0
-        items.forEach(item=> {
-            if (item.id>id) {
-                id=item.id;
+        this.listaproductos.forEach(item => {
+            if (item.id > id) {
+                id = item.id;
             }
         });
 
@@ -30,83 +32,93 @@ const fs = require('fs');
     }
 
     // save(Object): Number - Recibe un objeto, lo guarda en el archivo, devuelve el id asignado.
-    async save(object){
+    async save(object) {
+        let nuevo_id
 
-        const id =  await this.getMaxId() + 1
-        let items = await this.getAll()
-        object.id = id
-        items.push(object);
+        const { title, price, thumbnail } = object
 
-        try{
-            await fs.promises.writeFile(this.ruta, JSON.stringify(items));
+        try {
+            nuevo_id = await knex('productos')
+                .insert({
+                    title: title,
+                    price: price,
+                    thumbnail: thumbnail
+                })
+                .then(JSON.parse)
+      
         }
-        catch(error){
-            console.log(`Error al guardar archivo ${error}` )
+        catch (error) {
+            console.log(`Error al guardar archivo ${error}`)
         }
 
-        return id;
+        object.id = nuevo_id;
+        
+        this.listaproductos.push(object);
+
+        return nuevo_id;
+
     }
 
     // getById(Number): Object - Recibe un id y devuelve el objeto con ese id, o null si no está.
-    async getById(clave){
+    getById(clave) {
         let objeto
-        const items = await this.getAll()
-        
-        items.forEach(element => {
-            if (element.id==clave) {
+
+        this.listaproductos.forEach(element => {
+            if (element.id == clave) {
                 objeto = element
-            } 
+            }
         });
         return objeto
     }
 
-  
+
     // deleteById(Number): void - Elimina del archivo el objeto con el id buscado.
-    async deleteById(clave){
-     
-        let items = await fs.promises.readFile(this.ruta, this.encoding)
-        .then(JSON.parse)
-        .catch(()=>{return [] })
-        
-        let array=[];
+    async deleteById(clave) {
 
-        items.forEach(element => {
-            if (element.id!=clave) {
-                array.push(element);
-            } 
-        });
+        let array = [];
 
-        await fs.promises.writeFile(this.ruta, JSON.stringify(array));
+        try {
+            await knex('productos').where('id', clave).del()
+
+            this.listaproductos = await knex.select().from('productos').orderBy('id', 'desc')
+        }
+        catch (error) {
+            console.log(`Error al eliminar ${error}`)
+        }
 
     }
-    
+
     // deleteAll(): void - Elimina todos los objetos presentes en el archivo
-    async deleteAll(){
-        const items=[]
-        await fs.promises.writeFile(this.ruta, JSON.stringify(items));
+    async deleteAll() {
+        const items = []
+        try {
+            knex('productos').truncate()
+        }
+        catch (error) {
+            console.log(`Error al truncar ${error}`)
+        }
+
+        this.listaproductos = []
+
     }
 
     // update(Object):  Recibe un objeto, que busca en el archivo y actualiza .
-    async update(clave, data){
+    async update(clave, data) {
+        try {
+            const { title, price, thumbnail } = data
 
-        let items = await this.getAll()
-        let array=[];
+            await knex('productos').where('id', clave).update({
+                title: title,
+                price: price,
+                thumbnail: thumbnail
+            });
 
-        items.forEach(element => {
-            if(element.id == clave){
-                element.title = data.title
-                element.price = data.price
-                element.thumbnail = data.thumbnail
+            this.listaproductos = await knex.select().from('productos').orderBy('id', 'desc')
+        }
+        catch (error) {
+                console.log(`Error al actualizar ${error}`)
             }
-        });
-
-        try{
-            await fs.promises.writeFile(this.ruta, JSON.stringify(items));
         }
-        catch(error){
-            console.log(`Error al guardar archivo ${error}` )
-        }
-    }
 }
 
-module.exports= Contenedor
+module.exports = Contenedor

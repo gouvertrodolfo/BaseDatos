@@ -11,6 +11,8 @@ services:
       MARIADB_DATABASE: 'node'
       MARIADB_USER: 'user'
       MARIADB_PASSWORD: 1234
+    ports:
+      - 3306:3306      
     volumes:
       - ./data:/var/lib/mysql
 
@@ -18,4 +20,4 @@ services:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - 8081:8080

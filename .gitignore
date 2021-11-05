@@ -102,3 +102,10 @@ dist
 
 # TernJS port file
 .tern-port
+BD/mariadb/data/multi-master.info
+BD/mariadb/data/aria_log_control
+BD/mariadb/data/aria_log.00000001
+BD/mariadb/data/ib_buffer_pool
+BD/mariadb/data/ib_logfile0
+BD/mariadb/data/ibdata1
+BD/mariadb/data/ibtmp1
