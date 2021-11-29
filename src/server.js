@@ -2,15 +2,19 @@ const express = require('express')
 
 /**************************************************************************************** */
 const { apiProductos } = require("./routes/apiProductos")
+const { apiProductosTest } = require("./routes/apiProductosTest")
 const { webProductos } = require("./routes/webProductos")
+ const { webProductosTest } = require("./routes/webProductosTest")
 /**************************************************************************************** */
 const { Server: HttpServer } = require('http')
 const { Server: IOServer } = require('socket.io')
 /**************************************************************************************** */
-const Contenedor = require('./Contenedor')
+
+const Contenedor = require('./daos/Contenedor')
 const inventario = new Contenedor('productos.txt')
+
 /**************************************************************************************** */
-const Chat = require('./Chat')
+const Chat = require('./daos/ContenedorMensajes')
 const chat = new Chat();
 
 /**************************************************************************************** */
@@ -29,8 +33,9 @@ app.use(express.urlencoded({ extended: true }))
 
 //espacio de rutas
 app.use('/api/productos', apiProductos)
+app.use('/api/productosTest', apiProductosTest)
 app.use('/', webProductos)
-
+app.use('/test', webProductosTest)
 /**************************************************************************************** */
 
 /**************************************************************************************** */
@@ -39,7 +44,7 @@ io.on('connection', async socket => {
 
     console.log('Nuevo cliente conectado!')
 
-    let mensajes = await chat.init();    
+    let mensajes = await chat.getAll();    
     /* Envio los mensajes al cliente que se conectó */
     socket.emit('mensajes', mensajes)
 
@@ -47,9 +52,9 @@ io.on('connection', async socket => {
     socket.emit('productos', productos)
 
     /* Escucho los mensajes enviado por el cliente y se los propago a todos */
-    socket.on('nuevoMensaje', data => {
+    socket.on('nuevoMensaje', async data => {
         
-        mensajes = chat.AddMensaje(data)
+        mensajes = await chat.AddMensaje(data)
         io.sockets.emit('mensajes',  mensajes)
     })
 

@@ -1,4 +1,4 @@
-<% const hayProductos=data.length> 0; %>
+<% const hayProductos=productos.length> 0; %>
     <div class="container">
 
         <% if(hayProductos){ %>
@@ -8,7 +8,7 @@
                     <th>Precio</th>
                     <th>Fto</th>
                 </tr>
-                <% for (const item of data) {%>
+                <% for (const item of productos) {%>
                     <tr>
                         <td>
                             <%=item.title%>
@@ -24,12 +24,8 @@
             </table>
             <% } else{ %>
                 <h3 class="alert alert-danger">no se encontraron datos</h1>
-
-
-                    <div class="form-group">
-                        <input type="button" value="Fake" class="btn btn-success" onclick="cargarProductosFake()">
-                    </div>
-
                     <% } %>
-
+                    <div class="btn-group btn-group-justified">
+                        <input type="button" value="Agregar producto" onclick="location.href='/'" class="btn btn-default">
+                    </div>
     </div>

@@ -48,3 +48,17 @@ function armarHTML(plantilla, data) {
     const html = render({ data })
     return  html
 }
+
+async function cargarProductosFake(){
+
+    const [ plantilla, arrayProductos ] = await Promise.all([ buscarPlantillaProductos(), buscarProductosFake() ])
+
+    const html = armarHTML(plantilla, arrayProductos)
+    document.getElementById('grillaProductos').innerHTML = html
+
+}
+
+ function buscarProductosFake() {
+    return fetch('/api/productosTest/' )
+        .then(response => response.json())
+}
