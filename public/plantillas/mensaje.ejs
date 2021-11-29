@@ -5,7 +5,7 @@
 
             <% for (const item of data) {%>
                 <div>
-                     <strong class="text-primary"> <%= item.author %> </strong>
+                     <strong class="text-primary"> <%= item.author.alias %> </strong>
                      [<span class="text-danger"> <%= item.fechayhora %> </span>]: 
                      <em> <%= item.text %> </em>
                 </div>
