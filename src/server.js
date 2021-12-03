@@ -4,7 +4,7 @@ const express = require('express')
 const { apiProductos } = require("./routes/apiProductos")
 const { apiProductosTest } = require("./routes/apiProductosTest")
 const { webProductos } = require("./routes/webProductos")
- const { webProductosTest } = require("./routes/webProductosTest")
+const { webProductosTest } = require("./routes/webProductosTest")
 /**************************************************************************************** */
 const { Server: HttpServer } = require('http')
 const { Server: IOServer } = require('socket.io')
@@ -15,6 +15,7 @@ const inventario = new Contenedor('productos.txt')
 
 /**************************************************************************************** */
 const Chat = require('./daos/ContenedorMensajes')
+
 const chat = new Chat();
 
 /**************************************************************************************** */
@@ -38,6 +39,19 @@ app.use('/', webProductos)
 app.use('/test', webProductosTest)
 /**************************************************************************************** */
 
+const normalizer = require("normalizr")
+// const normalize = normalizer.normalize;
+const schema = normalizer.schema;
+
+// Definimos un esquema author
+const author_schema = new schema.Entity('author',{},{idAttribute:'correo'});
+
+// Definimos un esquema de mensaje
+const mensajes_schema = new schema.Entity('mensajes', {
+  commenter: author_schema
+});
+
+
 /**************************************************************************************** */
 
 io.on('connection', async socket => {
@@ -45,8 +59,13 @@ io.on('connection', async socket => {
     console.log('Nuevo cliente conectado!')
 
     let mensajes = await chat.getAll();    
+
+    console.log(mensajes)    
+    const mensajes_normal = normalizer.normalize(mensajes, mensajes_schema)
+    console.log(mensajes_normal)    
+
     /* Envio los mensajes al cliente que se conectó */
-    socket.emit('mensajes', mensajes)
+    socket.emit('mensajes', mensajes_normal)
 
     let productos = await inventario.init();
     socket.emit('productos', productos)

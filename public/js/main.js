@@ -1,3 +1,4 @@
+
 const socket = io.connect();
 
 function addMessage(e) {
@@ -27,8 +28,12 @@ function addProducto(prd) {
 }
 
 socket.on('mensajes', async msjs => {
+console.log(msjs)    
+
+const mensajes = normalizr.denormalize(msjs.result, mensajes_schema, msjs.entities)
+console.log(mensajes)    
     const plantilla = await buscarPlantillaMensajes()
-    const html = armarHTML(plantilla, msjs)
+    const html = armarHTML(plantilla, mensajes)
     document.getElementById('messages').innerHTML = html;
 });
 

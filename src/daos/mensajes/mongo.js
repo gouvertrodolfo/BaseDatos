@@ -17,7 +17,6 @@ class Mongo {
     // save(Object): Number - Recibe un objeto, lo guarda en el archivo, devuelve el id asignado.
     async AddMensaje(data) {
 
-
         await this.collection.insertOne(data)
             .then()
 

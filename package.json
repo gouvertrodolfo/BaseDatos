@@ -15,8 +15,9 @@
     "faker": "^5.5.3",
     "knex": "^0.95.13",
     "moment": "^2.29.1",
-    "mongodb": "^4.2.0",
+    "mongodb": "^4.2.1",
     "mysql": "^2.18.1",
+    "normalizr": "^3.6.1",
     "socket.io": "^3.0.4",
     "sqlite3": "^4.2.0"
   }
