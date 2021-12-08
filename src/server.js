@@ -39,17 +39,20 @@ app.use('/', webProductos)
 app.use('/test', webProductosTest)
 /**************************************************************************************** */
 
-const normalizer = require("normalizr")
+const normalizr = require("normalizr")
 // const normalize = normalizer.normalize;
-const schema = normalizer.schema;
+const schema = normalizr.schema;
 
 // Definimos un esquema author
 const author_schema = new schema.Entity('author',{},{idAttribute:'correo'});
 
 // Definimos un esquema de mensaje
-const mensajes_schema = new schema.Entity('mensajes', {
-  commenter: author_schema
-});
+const mensaje_schema = new schema.Entity('mensaje', {
+    author: author_schema
+  },{idAttribute:'_id'});
+
+// Definimos un esquema de mensaje
+const mensajes_schema = new schema.Array(mensaje_schema);
 
 
 /**************************************************************************************** */
